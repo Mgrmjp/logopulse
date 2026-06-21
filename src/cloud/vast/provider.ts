@@ -30,7 +30,7 @@ import type {
 import { loadConfig } from "../../config/load-config.js";
 import { logger } from "../../utils/logger.js";
 import { VastApi, type VastOffer, type VastInstance, sleep } from "./api.js";
-import { connectSsh, generateEphemeralKey, type SshKeyPair } from "./ssh.js";
+import { connectSsh, generateEphemeralKey, type SshKeyPair, type SshClient } from "./ssh.js";
 import { getExtension } from "../../utils/files.js";
 
 const REMOTE_DIR = "/tmp";
@@ -213,12 +213,24 @@ export class VastProvider implements CloudProvider {
       }
 
       // 8. open SSH and ship assets + job config
-      const ssh = await connectSsh({
-        host: inst.ssh_host,
-        port: inst.ssh_port,
-        username: this.sshUsername,
-        privateKey: key.privateKeyPem,
-      });
+      // Retry SSH connection — the daemon may need a few seconds after
+      // the instance reports "running".
+      let ssh!: SshClient;
+      for (let attempt = 1; attempt <= 10; attempt++) {
+        try {
+          ssh = await connectSsh({
+            host: inst.ssh_host,
+            port: inst.ssh_port,
+            username: this.sshUsername,
+            privateKey: key.privateKeyPem,
+          });
+          break;
+        } catch (err) {
+          if (attempt === 10) throw err;
+          logger.debug(`SSH attempt ${attempt}/10 failed, retrying in 5s...`);
+          await sleep(5000);
+        }
+      }
       try {
         const ext = (p: string) => getExtension(p) || ".bin";
         await ssh.putFile(assets.song, `${REMOTE_DIR}/song${ext(assets.song)}`);
