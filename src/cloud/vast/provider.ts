@@ -211,8 +211,8 @@ export class VastProvider implements CloudProvider {
       });
       logger.info(`Instance ${instanceId} created, waiting for it to come up...`);
 
-      // 7. wait for running
-      const inst = await waitForInstanceRunning(this.api, instanceId, 10 * 60_000);
+      // 7. wait for running (20 min — bootstrap needs to clone, install node, ffmpeg, npm ci, tsc)
+      const inst = await waitForInstanceRunning(this.api, instanceId, 20 * 60_000);
       if (!inst.ssh_host || !inst.ssh_port) {
         throw new Error(`Instance ${instanceId} running but has no ssh_host/port`);
       }
