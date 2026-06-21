@@ -1,0 +1,47 @@
+{
+  "name": "logopulse",
+  "version": "0.1.0",
+  "description": "Lightweight CLI tool for audio-reactive particle visualizer videos with static logos",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "logopulse": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "visualizer",
+    "audio-reactive",
+    "particles",
+    "video",
+    "logo",
+    "ffmpeg",
+    "pixijs"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "canvas": "^3.2.3",
+    "commander": "^15.0.0",
+    "fft.js": "^4.0.4",
+    "node-ssh": "^13.2.1",
+    "pixi.js": "^8.19.0",
+    "sharp": "^0.35.1"
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "scene": {
+    "preset": "burst-ring",
+    "backgroundBlur": 6,
+    "backgroundDarken": 0.4,
+    "vignette": 0.2,
+    "cameraMovement": false
+  },
+  "particles": {
+    "count": 4000,
+    "size": 2.5,
+    "speed": 0.8,
+    "innerRadius": 350,
+    "outerRadius": 900,
+    "bassExpansion": 350,
+    "beatBurst": true,
+    "beatBurstParticles": 400,
+    "avoidLogoArea": true,
+    "foregroundSparkles": false
+  },
+  "audioReactivity": {
+    "volume": 0.9,
+    "bass": 1.2,
+    "mids": 0.5,
+    "highs": 0.6,
+    "beat": 1.3,
+    "smoothing": 0.78
+  }
+}

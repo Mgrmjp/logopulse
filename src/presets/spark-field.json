@@ -1,0 +1,29 @@
+{
+  "scene": {
+    "preset": "spark-field",
+    "backgroundBlur": 10,
+    "backgroundDarken": 0.5,
+    "vignette": 0.3,
+    "cameraMovement": false
+  },
+  "particles": {
+    "count": 6000,
+    "size": 1.2,
+    "speed": 1.2,
+    "innerRadius": 400,
+    "outerRadius": 1100,
+    "bassExpansion": 200,
+    "beatBurst": true,
+    "beatBurstParticles": 300,
+    "avoidLogoArea": true,
+    "foregroundSparkles": true
+  },
+  "audioReactivity": {
+    "volume": 0.8,
+    "bass": 0.7,
+    "mids": 0.8,
+    "highs": 1.2,
+    "beat": 0.9,
+    "smoothing": 0.8
+  }
+}

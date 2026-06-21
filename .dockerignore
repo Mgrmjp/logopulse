@@ -1,0 +1,8 @@
+node_modules/
+dist/
+tmp/
+output/
+test-assets/
+*.mp4
+*.mp3
+.DS_Store

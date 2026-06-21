@@ -1,0 +1,64 @@
+{
+  "input": {
+    "song": "./assets/audio/Larkin to the Wild.wav",
+    "logo": "./assets/logo/logo.png",
+    "background": "./assets/background/ChatGPT Image Jun 20, 2026, 12_41_35 PM.png"
+  },
+  "output": {
+    "path": "./output.mp4",
+    "profile": "ultra",
+    "width": 3840,
+    "height": 2160,
+    "fps": 60,
+    "format": "mp4",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "videoBitrate": "60M",
+    "audioBitrate": "320k",
+    "pixelFormat": "yuv420p"
+  },
+  "scene": {
+    "preset": "static-logo-particles",
+    "backgroundBlur": 8,
+    "backgroundDarken": 0.45,
+    "vignette": 0.25,
+    "cameraMovement": false
+  },
+  "logo": {
+    "static": true,
+    "position": "center",
+    "size": 640,
+    "safeRadius": 380,
+    "shadow": true,
+    "shadowOpacity": 0.35
+  },
+  "particles": {
+    "count": 5000,
+    "size": 2.0,
+    "speed": 1.0,
+    "innerRadius": 420,
+    "outerRadius": 1040,
+    "bassExpansion": 280,
+    "beatBurst": true,
+    "beatBurstParticles": 240,
+    "avoidLogoArea": true,
+    "foregroundSparkles": false
+  },
+  "audioReactivity": {
+    "volume": 0.8,
+    "bass": 1.0,
+    "mids": 0.6,
+    "highs": 0.8,
+    "beat": 1.0,
+    "smoothing": 0.82
+  },
+  "runtime": {
+    "mode": "cloud",
+    "cloudProvider": "vast",
+    "useGpu": true,
+    "tempDir": "./tmp",
+    "streamFramesToFfmpeg": true,
+    "keepFrames": false,
+    "debug": false
+  }
+}

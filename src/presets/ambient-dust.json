@@ -1,0 +1,29 @@
+{
+  "scene": {
+    "preset": "ambient-dust",
+    "backgroundBlur": 12,
+    "backgroundDarken": 0.55,
+    "vignette": 0.35,
+    "cameraMovement": false
+  },
+  "particles": {
+    "count": 3000,
+    "size": 1.5,
+    "speed": 0.3,
+    "innerRadius": 500,
+    "outerRadius": 1200,
+    "bassExpansion": 100,
+    "beatBurst": false,
+    "beatBurstParticles": 0,
+    "avoidLogoArea": true,
+    "foregroundSparkles": false
+  },
+  "audioReactivity": {
+    "volume": 0.6,
+    "bass": 0.4,
+    "mids": 0.3,
+    "highs": 0.5,
+    "beat": 0.2,
+    "smoothing": 0.92
+  }
+}
