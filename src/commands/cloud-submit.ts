@@ -21,6 +21,7 @@ type SubmitOpts = {
   cloudImage?: string;
   gitUrl?: string;
   maxPrice?: string;
+  gpu?: string;
   disk?: string;
   output?: string;
   geolocation?: string;
@@ -28,11 +29,16 @@ type SubmitOpts = {
   pollMs?: string;
 };
 
-const DEFAULT_IMAGE = "logopulse/logopulse:latest";
-
 export async function cloudSubmitCommand(opts: SubmitOpts): Promise<void> {
   if (!opts.config) {
     throw new Error("--config is required");
+  }
+  if (!opts.cloudImage && !opts.gitUrl) {
+    throw new Error(
+      "Cloud submit requires either --git-url <repo> (no Docker publish needed) " +
+        "or --cloud-image <image> (a Docker image you have built and pushed). " +
+        "The old default logopulse/logopulse:latest image is not published."
+    );
   }
   const apiKey = process.env.VAST_API_KEY;
   if (!apiKey) {
@@ -71,10 +77,11 @@ export async function cloudSubmitCommand(opts: SubmitOpts): Promise<void> {
 
   const provider = new VastProvider({
     apiKey,
-    image: opts.cloudImage ?? DEFAULT_IMAGE,
+    image: opts.cloudImage ?? "",
     gitUrl: opts.gitUrl,
     diskGb: opts.disk ? parseInt(opts.disk) : undefined,
     maxPricePerHour: opts.maxPrice ? parseFloat(opts.maxPrice) : undefined,
+    gpuName: opts.gpu ? opts.gpu.split(",").map(s => s.trim()) : undefined,
     geolocation: opts.geolocation,
   });
 

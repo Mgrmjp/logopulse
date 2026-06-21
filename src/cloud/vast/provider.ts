@@ -86,6 +86,8 @@ export type VastProviderOptions = {
   diskGb?: number;
   /** Optional cap on per-hour cost. Aborts if cheapest offer exceeds this. */
   maxPricePerHour?: number;
+  /** Filter offers to these GPU names (e.g. ["RTX 5070 Ti", "RTX 4070"]). */
+  gpuName?: string[];
   /** Override fetch for testing. */
   fetchImpl?: typeof fetch;
   /**
@@ -117,6 +119,7 @@ export class VastProvider implements CloudProvider {
   private readonly image: string;
   private readonly diskGb: number;
   private readonly maxPricePerHour: number | undefined;
+  private readonly gpuName: string[] | undefined;
   private readonly onstart: string;
   private readonly sshUsername: string;
   private readonly minReliability: number;
@@ -135,6 +138,7 @@ export class VastProvider implements CloudProvider {
     this.image = opts.gitUrl ? DEFAULT_GIT_IMAGE : opts.image;
     this.diskGb = opts.diskGb ?? 50;
     this.maxPricePerHour = opts.maxPricePerHour;
+    this.gpuName = opts.gpuName;
     this.onstart = opts.onstart ?? (opts.gitUrl ? buildGitOnstart(opts.gitUrl) : DEFAULT_ONSTART);
     this.sshUsername = opts.sshUsername ?? "root";
     this.minReliability = opts.minReliability ?? 0.9;
@@ -149,6 +153,7 @@ export class VastProvider implements CloudProvider {
       rentable: true,
       rented: false,
       numGpusGte: 1,
+      gpuNameIn: this.gpuName,
       minReliability: this.minReliability,
       geolocation: this.geolocation,
       order: "dph_total",

@@ -84,6 +84,7 @@ export type SearchOffersOptions = {
   rentable?: boolean;
   rented?: boolean;
   numGpusGte?: number;
+  gpuNameIn?: string[];
   cudaVersGte?: number;
   diskSpaceGte?: number;
   minReliability?: number;
@@ -162,6 +163,7 @@ export class VastApi {
       rented: { eq: opts.rented ?? false },
     };
     if (opts.numGpusGte !== undefined) body.num_gpus = { gte: opts.numGpusGte };
+    if (opts.gpuNameIn !== undefined) body.gpu_name = { in: opts.gpuNameIn };
     if (opts.cudaVersGte !== undefined) body.cuda_vers = { gte: opts.cudaVersGte };
     if (opts.diskSpaceGte !== undefined) body.disk_space = { gte: opts.diskSpaceGte };
     if (opts.minReliability !== undefined) body.reliability = { gte: opts.minReliability };
