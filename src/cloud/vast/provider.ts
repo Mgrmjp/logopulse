@@ -42,7 +42,7 @@ const REMOTE_START_TRIGGER = `${REMOTE_DIR}/logopulse-start`;
 /** vast.ai's stock base image. Has nvidia drivers + container toolkit but
  *  not Node.js or git. We use this when --git-url is passed, so the
  *  onstart script clones the repo and bootstraps everything. */
-export const DEFAULT_GIT_IMAGE = "vastai/base-image:latest";
+export const DEFAULT_GIT_IMAGE = "vastai/base-image:cuda-12.6.3-auto";
 
 // Default onstart script (waits for /tmp/logopulse-start, then runs the worker).
 // The image is expected to have `logopulse` on PATH (set by the Dockerfile).
