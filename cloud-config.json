@@ -7,8 +7,8 @@
   "output": {
     "path": "./output.mp4",
     "profile": "ultra",
-    "width": 3840,
-    "height": 2160,
+    "width": 2560,
+    "height": 1440,
     "fps": 60,
     "format": "mp4",
     "videoCodec": "h264",

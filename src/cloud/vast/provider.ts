@@ -25,6 +25,7 @@ import type {
   CloudJob,
   CloudProvider,
   CloudJobStatus,
+  CloudStatusResult,
   PartialRenderConfig,
 } from "../../types.js";
 import { loadConfig } from "../../config/load-config.js";
@@ -279,7 +280,7 @@ export class VastProvider implements CloudProvider {
     }
   }
 
-  async getStatus(jobId: string): Promise<CloudJobStatus> {
+  async getStatus(jobId: string): Promise<CloudStatusResult> {
     const state = this.jobs.get(jobId);
     if (!state) throw new Error(`Unknown job: ${jobId}`);
 
@@ -289,7 +290,7 @@ export class VastProvider implements CloudProvider {
       inst = await this.api.getInstance(state.instanceId);
     } catch (err) {
       logger.warn(`getInstance failed: ${err}`);
-      return "failed";
+      return { status: "failed" };
     }
     if (
       inst.actual_status === "exited" ||
@@ -298,7 +299,7 @@ export class VastProvider implements CloudProvider {
       inst.actual_status === "unknown"
     ) {
       logger.warn(`Instance ${state.instanceId} is ${inst.actual_status}`);
-      return "failed";
+      return { status: "failed" };
     }
 
     // Try to read the status file
@@ -312,16 +313,25 @@ export class VastProvider implements CloudProvider {
       const { stdout, code } = await ssh.execCommand(
         `if [ -f ${REMOTE_STATUS} ]; then cat ${REMOTE_STATUS}; else echo '{}'; fi`
       );
-      if (code !== 0) return "running";
+      if (code !== 0) return { status: "running" };
       const trimmed = stdout.trim();
-      if (!trimmed || trimmed === "{}") return "running";
+      if (!trimmed || trimmed === "{}") return { status: "running" };
       try {
-        const parsed = JSON.parse(trimmed) as { status?: string; error?: string };
-        if (parsed.status === "completed") return "completed";
-        if (parsed.status === "failed") return "failed";
-        return "running";
+        const parsed = JSON.parse(trimmed) as {
+          status?: string;
+          error?: string;
+          frame?: number;
+          totalFrames?: number;
+        };
+        if (parsed.status === "completed") return { status: "completed" };
+        if (parsed.status === "failed") return { status: "failed" };
+        return {
+          status: "running",
+          frame: parsed.frame,
+          totalFrames: parsed.totalFrames,
+        };
       } catch {
-        return "running";
+        return { status: "running" };
       }
     } finally {
       await ssh.dispose();

@@ -53,11 +53,12 @@ RUN ffmpeg -encoders 2>/dev/null | grep -q h264_nvenc || \
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY tsconfig.json ./
 COPY src/ ./src/
-RUN npx tsc \
+RUN npm run build \
+  && npm prune --omit=dev \
   && npm link
 
 ENV PATH="/app/node_modules/.bin:${PATH}"

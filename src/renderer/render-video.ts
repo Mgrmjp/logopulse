@@ -14,6 +14,7 @@ import { buildFfmpegEncodeArgs } from "../encoder/ffmpeg.js";
 export type RenderOptions = {
   config: RenderConfig;
   previewSeconds?: number;
+  onProgress?: (frame: number, totalFrames: number) => void;
 };
 
 export async function renderVideo(opts: RenderOptions): Promise<void> {
@@ -85,6 +86,7 @@ export async function renderVideo(opts: RenderOptions): Promise<void> {
 
     if (i % 30 === 0 || i === framesToRender.length - 1) {
       showProgress(i + 1, framesToRender.length, "Rendering");
+      opts.onProgress?.(i + 1, framesToRender.length);
     }
   }
 

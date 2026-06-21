@@ -101,22 +101,33 @@ export async function cloudSubmitCommand(opts: SubmitOpts): Promise<void> {
     // 4. poll
     const pollMs = opts.pollMs ? parseInt(opts.pollMs) : 10_000;
     let lastHeartbeat = 0;
+    let renderStartTime: number | undefined;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const status = await provider.getStatus(job.id);
-      if (status === "completed") {
+      const result = await provider.getStatus(job.id);
+      if (result.status === "completed") {
         logger.info("Job completed. Downloading result...");
         await provider.downloadResult(job.id, outputPath);
         logger.info(`Output: ${outputPath}`);
         return;
       }
-      if (status === "failed") {
+      if (result.status === "failed") {
         throw new Error(`Job ${job.id} failed (instance or worker reported failure)`);
       }
-      // queued or running
-      if (Date.now() - lastHeartbeat > 30_000) {
+      // running — show progress if available
+      if (result.frame && result.totalFrames) {
+        if (!renderStartTime) renderStartTime = Date.now();
+        const elapsed = (Date.now() - renderStartTime) / 1000;
+        const fps = result.frame / elapsed;
+        const remaining = (result.totalFrames - result.frame) / fps;
+        const pct = ((result.frame / result.totalFrames) * 100).toFixed(1);
+        const eta = formatDuration(remaining);
         process.stderr.write(
-          `[${new Date().toISOString().slice(11, 19)}] still ${status}...\n`
+          `\r[frame ${result.frame}/${result.totalFrames} (${pct}%) ${fps.toFixed(1)}fps ETA ${eta}]    `
+        );
+      } else if (Date.now() - lastHeartbeat > 30_000) {
+        process.stderr.write(
+          `[${new Date().toISOString().slice(11, 19)}] still running...\n`
         );
         lastHeartbeat = Date.now();
       }
@@ -135,4 +146,11 @@ export async function cloudSubmitCommand(opts: SubmitOpts): Promise<void> {
       }
     }
   }
+}
+
+function formatDuration(seconds: number): string {
+  if (!isFinite(seconds) || seconds < 0) return "?";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return m > 0 ? `${m}m${s}s` : `${s}s`;
 }

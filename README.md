@@ -64,6 +64,9 @@ logopulse cloud submit --config examples/visualizer.json \
 The image must have `logopulse` on PATH (the included `Dockerfile` does
 this via `npm link`).
 
+`logopulse/logopulse:latest` is not published by this repo. If you do not
+want to build and push your own image, use Option A with `--git-url` instead.
+
 ### Common flags
 
 ```bash

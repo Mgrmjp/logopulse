@@ -107,7 +107,12 @@ export async function workerCommand(opts: WorkerOpts): Promise<void> {
   logger.info(`Song: ${config.input.song}`);
 
   try {
-    await renderVideo({ config });
+    await renderVideo({
+      config,
+      onProgress: (frame, totalFrames) => {
+        writeStatus({ status: "running", frame, totalFrames });
+      },
+    });
     writeStatus({ status: "completed" });
     logger.info("Worker: render completed");
   } catch (err) {

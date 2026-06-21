@@ -32,7 +32,7 @@ describe("VastApi", () => {
         cpu_ram: 32_000,
         disk_space: 100,
         cuda_vers: 12.4,
-        dph: 0.2,
+        dph_total: 0.2,
         reliability: 0.95,
         geolocation: "US",
         verified: true,
@@ -43,11 +43,11 @@ describe("VastApi", () => {
       const fetchImpl = mockFetch([{ status: 200, body: { offers: [offer] } }]);
       const api = new VastApi({ apiKey: "test", fetchImpl });
 
-      const offers = await api.searchOffers({ order: "dph", limit: 20, numGpusGte: 1 });
+      const offers = await api.searchOffers({ order: "dph_total", limit: 20, numGpusGte: 1 });
 
       expect(offers).toHaveLength(1);
       expect(offers[0].gpu_name).toBe("RTX_3090");
-      expect(offers[0].dph).toBe(0.2);
+      expect(offers[0].dph_total).toBe(0.2);
 
       const call = (fetchImpl as any).mock.calls[0];
       expect(call[0]).toBe("https://console.vast.ai/api/v0/bundles/");
@@ -60,7 +60,7 @@ describe("VastApi", () => {
       expect(body.rentable).toEqual({ eq: true });
       expect(body.rented).toEqual({ eq: false });
       expect(body.num_gpus).toEqual({ gte: 1 });
-      expect(body.order).toBe("dph");
+      expect(body.order).toEqual([["dph_total", "asc"]]);
       expect(body.limit).toBe(20);
     });
 

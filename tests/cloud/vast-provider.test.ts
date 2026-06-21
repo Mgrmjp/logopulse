@@ -61,7 +61,7 @@ const OFFER = {
   cpu_ram: 32_000,
   disk_space: 100,
   cuda_vers: 12.4,
-  dph: 0.2,
+  dph_total: 0.2,
   reliability: 0.95,
   geolocation: "US",
   verified: true,
@@ -264,7 +264,7 @@ describe("VastProvider.submitJob", () => {
 
   it("aborts when cheapest offer exceeds max-price", async () => {
     const { fetchImpl } = makeFetch([
-      { status: 200, body: { offers: [{ ...OFFER, dph: 5.0 }] } },
+      { status: 200, body: { offers: [{ ...OFFER, dph_total: 5.0 }] } },
     ]);
     const provider = new VastProvider({ apiKey: "k", image: "x", maxPricePerHour: 1.0, fetchImpl });
     await expect(provider.submitJob("/nope", { song: "", logo: "", background: "" })).rejects.toThrow(
@@ -315,7 +315,7 @@ describe("VastProvider.getStatus", () => {
       offerDph: 0.1,
     });
     const status = await provider.getStatus("1");
-    expect(status).toBe("failed");
+    expect(status).toEqual({ status: "failed" });
   });
 
   it("returns 'completed' when status file reports completed", async () => {
@@ -335,7 +335,7 @@ describe("VastProvider.getStatus", () => {
       key: { publicKeyOpenSsh: "k", privateKeyPem: "p", fingerprint: "f" },
       offerDph: 0.1,
     });
-    expect(await provider.getStatus("1")).toBe("completed");
+    expect(await provider.getStatus("1")).toEqual({ status: "completed" });
   });
 
   it("returns 'running' when status file is missing", async () => {
@@ -351,7 +351,7 @@ describe("VastProvider.getStatus", () => {
       key: { publicKeyOpenSsh: "k", privateKeyPem: "p", fingerprint: "f" },
       offerDph: 0.1,
     });
-    expect(await provider.getStatus("1")).toBe("running");
+    expect(await provider.getStatus("1")).toEqual({ status: "running" });
   });
 });
 

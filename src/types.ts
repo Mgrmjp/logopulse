@@ -123,7 +123,7 @@ export type AudioMetadata = {
 
 export type CloudProvider = {
   submitJob(configPath: string, assets: AssetPaths): Promise<CloudJob>;
-  getStatus(jobId: string): Promise<CloudJobStatus>;
+  getStatus(jobId: string): Promise<CloudStatusResult>;
   downloadResult(jobId: string, outputPath: string): Promise<void>;
   destroy(jobId: string): Promise<void>;
 };
@@ -146,6 +146,12 @@ export type CloudJobStatus =
   | "running"
   | "completed"
   | "failed";
+
+export type CloudStatusResult = {
+  status: CloudJobStatus;
+  frame?: number;
+  totalFrames?: number;
+};
 
 export type RenderReport = {
   output: string;
