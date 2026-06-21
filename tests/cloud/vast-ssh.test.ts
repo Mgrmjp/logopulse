@@ -30,10 +30,10 @@ describe("generateEphemeralKey", () => {
     }
   });
 
-  it("private key is PKCS8 PEM that ssh2/node-ssh can consume", () => {
+  it("private key is OpenSSH format that ssh2/node-ssh can consume", () => {
     const k = generateEphemeralKey();
-    expect(k.privateKeyPem).toContain("-----BEGIN PRIVATE KEY-----");
-    expect(k.privateKeyPem).toContain("-----END PRIVATE KEY-----");
+    expect(k.privateKeyPem).toContain("-----BEGIN OPENSSH PRIVATE KEY-----");
+    expect(k.privateKeyPem).toContain("-----END OPENSSH PRIVATE KEY-----");
   });
 
   it("fingerprint is SHA256-prefixed base64", () => {

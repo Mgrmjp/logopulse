@@ -7,7 +7,11 @@
 // Format note: we generate PKCS8 PEM via node:crypto. node-ssh → ssh2 accepts
 // PKCS8 PEM directly, so no ssh-keygen round-trip is needed.
 
-import { generateKeyPairSync, createHash } from "node:crypto";
+import { createHash } from "node:crypto";
+import { execSync } from "node:child_process";
+import { writeFileSync, readFileSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { NodeSSH, type Config as NodeSshConfig, type SSHExecCommandResponse } from "node-ssh";
 
 export type SshKeyPair = {
@@ -21,50 +25,40 @@ export type SshKeyPair = {
 
 const KEY_COMMENT = "logopulse-ephemeral";
 
-/** Generate a fresh ed25519 keypair in memory. */
+/** Generate a fresh ed25519 keypair in memory using ssh-keygen.
+ *  ssh-keygen produces OpenSSH format which ssh2 accepts natively. */
 export function generateEphemeralKey(): SshKeyPair {
-  const { publicKey: pubPem, privateKey: privPem } = generateKeyPairSync("ed25519", {
-    publicKeyEncoding: { type: "spki", format: "pem" },
-    privateKeyEncoding: { type: "pkcs8", format: "pem" },
-  });
+  const prefix = join(tmpdir(), `logopulse-key-${Date.now()}`);
+  const privPath = prefix;
+  const pubPath = `${prefix}.pub`;
+  try {
+    execSync(`ssh-keygen -t ed25519 -f "${privPath}" -N "" -q -C ${KEY_COMMENT}`);
+    const privateKeyPem = readFileSync(privPath, "utf8");
+    const pubLine = readFileSync(pubPath, "utf8").trim();
 
-  // SPKI body for ed25519 has a 12-byte header. The 32 raw key bytes start
-  // at offset 12.
-  const pubDer = Buffer.from(
-    pubPem
-      .replace(/-----BEGIN PUBLIC KEY-----/, "")
-      .replace(/-----END PUBLIC KEY-----/, "")
-      .replace(/\s+/g, ""),
-    "base64"
-  );
-  const rawPub = pubDer.subarray(12);
-  if (rawPub.length !== 32) {
-    throw new Error(`ed25519 public key has unexpected length ${rawPub.length}`);
+    // Extract raw 32-byte public key from the OpenSSH pub line for fingerprinting
+    const parts = pubLine.split(" ");
+    const pubBlob = Buffer.from(parts[1], "base64");
+    // Wire format: 4-byte len + "ssh-ed25519" + 4-byte len + 32 bytes key
+    const rawPub = pubBlob.subarray(19);
+    if (rawPub.length !== 32) {
+      throw new Error(`ed25519 public key has unexpected length ${rawPub.length}`);
+    }
+
+    const fp = createHash("sha256")
+      .update(rawPub)
+      .digest("base64")
+      .replace(/=+$/, "");
+
+    return {
+      publicKeyOpenSsh: pubLine,
+      privateKeyPem,
+      fingerprint: `SHA256:${fp}`,
+    };
+  } finally {
+    try { unlinkSync(privPath); } catch {}
+    try { unlinkSync(pubPath); } catch {}
   }
-
-  // OpenSSH wire format (RFC 4253 + RFC 8709): the value field is an SSH
-  // string "key" where each string is 4-byte length prefix + content.
-  //   string  "ssh-ed25519"  (length 11)
-  //   string  <32 raw bytes>  (length 32)
-  // So we build a 51-byte buffer and base64-encode it.
-  const blob = Buffer.alloc(51);
-  blob.writeUInt32BE(11, 0);
-  blob.write("ssh-ed25519", 4, 11, "ascii");
-  blob.writeUInt32BE(32, 15);
-  rawPub.copy(blob, 19);
-  const wirePub = `ssh-ed25519 ${blob.toString("base64")} ${KEY_COMMENT}`;
-
-  // sha256 fingerprint of the raw public key, base64-padded-stripped
-  const fp = createHash("sha256")
-    .update(rawPub)
-    .digest("base64")
-    .replace(/=+$/, "");
-
-  return {
-    publicKeyOpenSsh: wirePub,
-    privateKeyPem: privPem,
-    fingerprint: `SHA256:${fp}`,
-  };
 }
 
 export type SshConnection = {
